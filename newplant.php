@@ -85,64 +85,60 @@ while ($row = mysqli_fetch_assoc($existing_entries_result)) {
         .header-date {
             font-size: 18px;
         }
+
         .container {
-            display: flex;
-            gap: 30px;
+            display: grid;
+            grid-template-columns: 40% 60%;
+            align-items: start;
+            gap: 50px;
             padding: 30px;
             max-width: 1400px;
             margin: 0 auto;
         }
-        .form-container {
-            background: #232323;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px #0006;
-            flex: 1;
-            padding: 30px;
-            max-width: 500px;
-            height: 45rem;
-            /* max-height: 100vh; */
-            /* overflow-y: auto;  */
 
-        }
-        .entries-container {
-            background: #232323;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px #0006;
-            flex: 1;
-            padding: 30px;
-            /* max-height: 90rem; */
-            /* overflow-y: auto; */
-        }
-        .form-container h2, .entries-container h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 22px;
-            letter-spacing: 1px;
-            color: #f1c40f;
+        form {
+            display: grid;
+            gap: 20px;
         }
         .form-group {
-            margin-bottom: 18px;
+            display: grid;
+            gap: 2px
+
         }
+
+        .form-container {
+            flex: 1;
+            background: #232323;
+            padding: 20px;
+            border-radius: 16px;
+        }
+
         .form-group label {
             display: block;
-            margin-bottom: 6px;
+            font-size: large;
+
             font-weight: bold;
             color: #f1c40f;
         }
+
         .form-group input, .form-group select {
-            width: 100%;
-            padding: 8px 10px;
-            border-radius: 6px;
-            border: none;
-            font-size: 16px;
-            background: #181818;
+
             color: #fff;
+            padding: 8px;
+            font-size: 15px;
+            border-radius: 8px;
+            background: #181818;
         }
-        .form-group input[type="number"]::-webkit-inner-spin-button,
-        .form-group input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+
+        .entries-container {
+            padding: 20px 30px;
+
+            background: #232323;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px #0006;
+            flex: 1;
         }
+
         .btn-submit {
             background: #2ecc40;
             color: #fff;
