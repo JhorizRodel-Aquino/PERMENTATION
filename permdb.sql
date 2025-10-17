@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 09, 2025 at 01:01 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Generation Time: Oct 17, 2025 at 11:26 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -1105,8 +1105,8 @@ CREATE TABLE `plant_analysis` (
   `week` int(11) DEFAULT NULL,
   `chlorophyll_manual` float DEFAULT NULL,
   `chlorophyll_chamber` float DEFAULT NULL,
-  `leafcount_manual` int(11) DEFAULT NULL,
-  `leafcount_chamber` int(11) DEFAULT NULL,
+  `leafcount_manual` float DEFAULT NULL,
+  `leafcount_chamber` float DEFAULT NULL,
   `survivability_manual` float DEFAULT NULL,
   `survivability_chamber` float DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
@@ -1117,13 +1117,15 @@ CREATE TABLE `plant_analysis` (
 --
 
 INSERT INTO `plant_analysis` (`id`, `crop`, `week`, `chlorophyll_manual`, `chlorophyll_chamber`, `leafcount_manual`, `leafcount_chamber`, `survivability_manual`, `survivability_chamber`, `created_at`) VALUES
-(1, 'Lettuce', 1, 12, 12, 12, 12, 12, 12, '2025-06-08 21:02:59'),
-(2, 'Mustasa', 1, 12, 23, 34, 23, 21, 32, '2025-06-08 21:03:21'),
-(3, 'Pechay', 1, 12, 12, 12, 12, 13, 14, '2025-06-08 21:03:43'),
-(4, 'Lettuce', 2, 12, 43, 21, 32, 31, 21, '2025-06-08 21:18:46'),
-(5, 'Lettuce', 3, 3, 12, 12, 12, 12, 12, '2025-06-08 21:24:38'),
-(6, 'Mustasa', 2, 12, 21, 12, 24, 21, 21, '2025-06-08 21:28:12'),
-(7, 'Mustasa', 3, 12, 13, 12, 13, 12, 32, '2025-06-08 21:28:43');
+(9, 'Pechay', 1, 0, 0, 2, 2.2, 98.6, 100, '2025-10-17 13:39:07'),
+(10, 'Pechay', 2, 0.52, 0.51, 3.5, 3.4, 98.6, 98, '2025-10-17 13:41:22'),
+(11, 'Pechay', 3, 0.41, 0.43, 4, 4.2, 96.4, 98, '2025-10-17 13:41:56'),
+(12, 'Mustasa', 1, 0, 0, 1.9, 2, 95.2, 99, '2025-10-17 13:46:49'),
+(13, 'Mustasa', 2, 0.54, 0.55, 3, 3.5, 96.2, 100, '2025-10-17 13:47:18'),
+(14, 'Mustasa', 3, 0.48, 0.41, 2.4, 4, 70.2, 98.6, '2025-10-17 13:47:49'),
+(15, 'Lettuce', 1, 0, 0, 0.8, 2.1, 48.6, 76.4, '2025-10-17 13:48:43'),
+(16, 'Lettuce', 2, 0.38, 0.38, 1.3, 3.1, 63.5, 94, '2025-10-17 13:49:13'),
+(17, 'Lettuce', 3, 0.34, 0.3, 2.8, 5.2, 83.7, 98.3, '2025-10-17 13:49:56');
 
 --
 -- Indexes for dumped tables
@@ -1167,7 +1169,7 @@ ALTER TABLE `datalogs`
 -- AUTO_INCREMENT for table `plant_analysis`
 --
 ALTER TABLE `plant_analysis`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
