@@ -1,77 +1,12 @@
 <?php
+
 // --- Database connection ---
 $conn = mysqli_connect("127.0.0.1", "root", "", "permdb");
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-$minIntervalVal = 10;    // Adjust Min Interval Value
-$maxIntervalVal = 60;   // Adjust Max Interval Value
-$minTemperatureVal = 25;    // Adjust Min Temperature Value
-$maxTemperatureVal = 30;   // Adjust Max Temperature Value
-
-// Handle form submissions FIRST, before any HTML output
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && 
-    (isset($_POST['intervalUp']) || isset($_POST['intervalDown']) || 
-    //  isset($_POST['temperatureUp']) || isset($_POST['temperatureDown'])
-     isset($_POST['updateTemp'])
-     )) {
-
-    // Handle Interval Updates
-    $controlsSQL = "SELECT intervals, temperature FROM control WHERE id=1";
-    $controlsResult = mysqli_query($conn, $controlsSQL);
-
-    if ($controlsResult && mysqli_num_rows($controlsResult) > 0) {
-        $controlsRow = mysqli_fetch_assoc($controlsResult);
-        $intervalVal = floatval($controlsRow['intervals']);
-        $temperatureVal = floatval($controlsRow['temperature']);
-
-        if (isset($_POST['intervalUp']) && $intervalVal < $maxIntervalVal) {
-            $intervalVal++;
-        }
-        if (isset($_POST['intervalDown']) && $intervalVal > $minIntervalVal) {
-            $intervalVal--;
-        }
-
-        // if (isset($_POST['temperatureUp']) && $temperatureVal < $maxTemperatureVal) {
-        //     $temperatureVal++;
-        // }
-        // if (isset($_POST['temperatureDown']) && $temperatureVal > $minTemperatureVal) {
-        //     $temperatureVal--;
-        // }
-
-        if (isset($_POST['updateTemp'])) {
-            $temperatureVal = $_POST['tempThreshold'];
-            echo "$temperatureVal";
-        }
-
-        $updateControlsSQL = "UPDATE control SET intervals = $intervalVal, temperature = $temperatureVal WHERE id=1";
-        mysqli_query($conn, $updateControlsSQL);
-    }
-    
-    // // Redirect to prevent form resubmission
-    // header("Location: " . $_SERVER['PHP_SELF']);
-    // exit();
-    
-    // Redirect only for normal form submissions (not AJAX)
-    if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) || 
-        strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest') {
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    } else {
-        // For AJAX (fetch) requests, just output success
-        echo "updated";
-        exit();
-    }
-
-}
-
-// Fetch current values for display (AFTER potential update)
-$controlsSQL = "SELECT intervals, temperature FROM control WHERE id=1";
-$controlsResult = mysqli_query($conn, $controlsSQL);
-$controlsRow = $controlsResult ? mysqli_fetch_assoc($controlsResult) : null;
-
-// Fetch all plant analysis data for charts
+// Fetch all plant analysis data, grouped by crop and week
 $sql = "SELECT crop, week, chlorophyll_manual, chlorophyll_chamber, leafcount_manual, leafcount_chamber, survivability_manual, survivability_chamber
         FROM plant_analysis
         ORDER BY crop, week";
@@ -104,21 +39,13 @@ while ($row = mysqli_fetch_assoc($result)) {
     $data[$crop]['survivability_chamber'][] = floatval($row['survivability_chamber']);
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Chart.js CDN for demo -->
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    </head>
-    <meta charset="UTF-8">
+     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OHN Monitoring System</title>
-    <link rel="stylesheet" href="analysis.css">
-    <!-- ...existing style and links... -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
     <style>
         body {
             margin: 0;
@@ -222,67 +149,35 @@ while ($row = mysqli_fetch_assoc($result)) {
             letter-spacing: 1px;
         }
         .control-btns {
-            display: grid;
-            gap: 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
             align-items: center;
-            justify-items: center;
         }
         .circle-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 20%;
-            font-size: 25px;
-
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+            box-shadow: 0 2px 8px #0004;
         }
         .circle-btn.power-on { background: #2196f3; color: #fff; }
         .circle-btn.power-off { background: #e74c3c; color: #fff; }
-        .circle-btn.up { background: #c9af04; color: #fff; }
-        .circle-btn.down { background: #c9af04; color: #fff; }
+        .circle-btn.up { background: #2ecc40; color: #fff; }
+        .circle-btn.down { background: #2ecc40; color: #fff; transform: rotate(180deg);}
         .circle-btn.temp { background: #f1c40f; color: #fff; }
-
-        .control {
-            display: grid;
-            justify-items: center;
-        }
-
-        .control-form {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .control-title {
-            justify-self: center;
-        }
-
         .control-label {
-            display: grid;
-            gap: 1px;
-            align-items: center;
-            justify-items: center;
+            font-size: 15px;
+            margin-bottom: 18px;
+            text-align: center;
         }
-
-        .control-value {
-            font-size: 40px;
-            font-weight: bold;
-        }
-
-        .control-label.small {
-            font-size: 20px;
-        }
-
-        .temp-range {
-        margin-top: 10px;
-        width: 100%;
-        height: 8px;
-        /* -webkit-appearance: none; */
-        /* appearance: none; */
-        background: yellow; /* fallback color */
-        border-radius: 5px;
-        outline: none;
-        }
-
-
         @media (max-width: 1200px) {
             .analysis-grid { grid-template-columns: 1fr 1fr; }
         }
@@ -293,6 +188,20 @@ while ($row = mysqli_fetch_assoc($result)) {
             .parameter-controls { min-width: unset; width: 100%; margin-top: 20px;}
             .analysis-section { width: 100%; }
         }
+    </style>
+    <!-- Chart.js CDN for demo -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OHN Monitoring System</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- ...existing style and links... -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ...existing CSS... */
     </style>
 </head>
 <body>
@@ -311,7 +220,6 @@ while ($row = mysqli_fetch_assoc($result)) {
             <a href="predictions.php"><i class="fas fa-chart-bar sidebar-icon"></i></a>
             <a href="newplant.php"><i class="fas fa-gear sidebar-icon"></i></a>
         </div>
-
         <div class="content-area">
             <div class="analysis-section">
                 <div class="analysis-title">COMPARATIVE ANALYSIS</div>
@@ -354,69 +262,93 @@ while ($row = mysqli_fetch_assoc($result)) {
                     </div>
                 </div>
             </div>
-        </div>  
+            <div class="parameter-controls">
+                <div class="controls-title">PARAMETER CONTROLS</div>
+                <div class="control-btns">
+                    <div>
+                        <button class="circle-btn power-on"><span>&#128263;</span></button>
+                        <div class="control-label">System Power</div>
+                    </div>
+                    <div>
+                       <?php 
+                            $minIntervalVal = 1;    //Adjust Min Interval Value
+                            $maxIntervalVal = 10;   //Adjust Max Interval Value
 
-        <div class="parameter-controls">
-        <div class="controls-title">PARAMETER CONTROLS</div>
-        
-        <div class="control-btns">
-            <!-- System Power -->
-            <!-- <div>
-                <button class="circle-btn power-on"><span>&#128263;</span></button>
-                <div class="control-label">System Power</div>
-            </div> -->
-            
-            <!-- Mixing Interval -->
-            <div class="control">
-                <h4 class="control-title">Mixing Interval</h4>
-                <form method="POST" action="" class="control-form">
-                    <button class="circle-btn down" type="submit" name="intervalDown">&#9664;</button>
+                            $intervalSQL = "SELECT intervals FROM control WHERE id=1";
+                            $intervalResult = mysqli_query($conn, $intervalSQL);
 
-                    <div class="control-label">
-                        <div class="control-value">                    
+                            if ($intervalResult && mysqli_num_rows($intervalResult) > 0) {
+                                $intervalRow = mysqli_fetch_assoc($intervalResult);
+                                $intervalVal = floatval($intervalRow['intervals']);
+
+                                if (isset($_POST['intervalUp']) || isset($_POST['intervalDown'])) {
+                                    if (isset($_POST['intervalUp'])) {
+                                        if ($intervalVal < $maxIntervalVal) $intervalVal++;
+                                    }
+                                    if (isset($_POST['intervalDown']) && $intervalVal > 0) {
+                                        if ($intervalVal > $minIntervalVal) $intervalVal--;
+                                    }
+
+                                    $updateIntervalSQL = "UPDATE control SET intervals = $intervalVal WHERE id=1";
+                                    mysqli_query($conn, $updateIntervalSQL);
+
+                                    $intervalRow['intervals'] = $intervalVal;
+                                }
+                            }
+                            ?>
+                        <form method="POST" action="">
+                            <button class="circle-btn up" type="submit" name="intervalUp" >&#9650;</button>
+                            <button class="circle-btn down" type="submit" name="intervalDown" >&#9650;</button>
+                        </form>
+                        <div class="control-label">Mixing Intervals: 
                             <?php
-                                if ($controlsRow) echo $controlsRow['intervals'];
+                                if ($intervalRow) echo $intervalRow['intervals'];
                                 else echo "<br /><i>No interval data found</i>";
                             ?>
                         </div>
-                        <small>Minutes</small>
                     </div>
+                    <div>
+                        <?php 
+                            $minTemperatureVal = 1;    //Adjust Min Temperature Value
+                            $maxTemperatureVal = 10;   //Adjust Max Temperature Value
 
-                    <button class="circle-btn up" type="submit" name="intervalUp">&#9654;</button>
-                </form>
+                            $temperatureSQL = "SELECT temperature FROM control WHERE id=1";
+                            $temperatureResult = mysqli_query($conn, $temperatureSQL);
 
-            </div>
-            
-            <!-- Temperature Control -->
-            <div class="control">
-                <h4 class="control-title">Temp Threshold</h4>
-                
-                    
-                <form method="POST" action="">
-                    <div class="control-label">
-                        <div class="control-value">   
-                            <output id="tempOutput"><?php echo number_format((float)$controlsRow['temperature'], 2, '.', '') . ' °C';?></output>
+                            if ($temperatureResult && mysqli_num_rows($temperatureResult) > 0) {
+                                $temperatureRow = mysqli_fetch_assoc($temperatureResult);
+                                $temperatureVal = floatval($temperatureRow['temperature']);
+
+                                if (isset($_POST['temperatureUp']) || isset($_POST['temperatureDown'])) {
+                                    if (isset($_POST['temperatureUp'])) {
+                                        if ($temperatureVal < $maxTemperatureVal) $temperatureVal++;
+                                    }
+                                    if (isset($_POST['temperatureDown']) && $temperatureVal > 0) {
+                                        if ($temperatureVal > $minTemperatureVal) $temperatureVal--;
+                                    }
+
+                                    $updateTemperatureSQL = "UPDATE control SET temperature = $temperatureVal WHERE id=1";
+                                    mysqli_query($conn, $updateTemperatureSQL);
+
+                                    $temperatureRow['temperature'] = $temperatureVal;
+                                }
+                            }
+                            ?>
+                        <form method="POST" action="">
+                            <button class="circle-btn up" type="submit" name="temperatureUp" >&#9650;</button>
+                            <button class="circle-btn down" type="submit" name="temperatureDown" >&#9650;</button>
+                        </form>
+                        <div class="control-label">Temp Controller Threshold: 
+                            <?php
+                                if ($temperatureRow) echo $temperatureRow['temperature'];
+                                else echo "<br /><i>No temperature data found</i>";
+                            ?>
                         </div>
-                        
-                        
-                        <input 
-                            type="range" 
-                            id="tempThreshold" 
-                            name="tempThreshold"
-                            class="temp-range" 
-                            min="<?php echo $minTemperatureVal; ?>" 
-                            max="<?php echo $maxTemperatureVal; ?>" 
-                            value="<?php echo $controlsRow['temperature']; ?>" 
-                            step="0.2"
-                            oninput="handleTempChange(this)"
-                        >
-                       
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
- 
     <script>
         // Data from PHP
         const weeks = <?php echo json_encode($weeks); ?>;
@@ -546,37 +478,5 @@ while ($row = mysqli_fetch_assoc($result)) {
             options: { plugins: { legend: { labels: { color: '#fff' } } }, scales: { x: { ticks: { color: '#fff' } }, y: { ticks: { color: '#fff' }, beginAtZero: true } } }
         });
     </script>
-
-    <script>
-        let tempTimer;
-
-        function handleTempChange(input) {
-            const output = document.getElementById('tempOutput');
-            output.value = `${parseFloat(input.value).toFixed(2)} °C`;
-
-            // Clear the previous timer
-            clearTimeout(tempTimer);
-
-            // Wait 1 second of inactivity before submitting
-            tempTimer = setTimeout(() => {
-                const formData = new FormData();
-                formData.append('tempThreshold', input.value);
-                formData.append('updateTemp', true);
-
-                
-                fetch('', { // same page
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                body: formData
-                })
-                .then(response => response.text())
-                .then(data => {
-                console.log('Server says:', data);
-                })
-                .catch(error => console.error('Error updating temperature:', error));
-            }, 1000);
-        }
-    </script>
-
 </body>
 </html>

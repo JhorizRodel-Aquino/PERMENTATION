@@ -1,0 +1,3 @@
+<?php 
+$intervalVal = 0;
+?>
