@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 17, 2025 at 11:26 AM
+-- Generation Time: Oct 20, 2025 at 11:04 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -30,15 +30,17 @@ SET time_zone = "+00:00";
 CREATE TABLE `control` (
   `id` int(11) NOT NULL,
   `motor` int(10) NOT NULL,
-  `led` int(10) NOT NULL
+  `led` int(10) NOT NULL,
+  `intervals` int(11) NOT NULL,
+  `temperature` float(5,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `control`
 --
 
-INSERT INTO `control` (`id`, `motor`, `led`) VALUES
-(1, 0, 0);
+INSERT INTO `control` (`id`, `motor`, `led`, `intervals`, `temperature`) VALUES
+(1, 0, 0, 22, 28.80);
 
 -- --------------------------------------------------------
 
